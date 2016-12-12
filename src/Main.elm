@@ -7,7 +7,7 @@ p1 = Seq
         (Attr "x" (Add (Num 11) (Num 9)))
 --        (Attr "y" (Add (Num 11) (Num 9)))
 
-        (If_Else (Var "x")
+        (IfElse (Var "x")
             (Attr "ret" (Var "x"))
             (Attr "ret" (Num 100))
         )
@@ -20,7 +20,7 @@ p2 = Seq
             (Attr "n" (Num 10))
         )
 
-        (While (Less_Than (Var "i") (Var "n"))
+        (While (LessThan (Var "i") (Var "n"))
             (Seq
                 (Attr "ret" (Add (Var "ret") (Var "i")))
                 (Attr "i" (Add (Var "i") (Num 1)))

@@ -8,37 +8,69 @@ type Exp = Add  Exp Exp
          | Sub  Exp Exp
          | Mult Exp Exp
          | Div  Exp Exp
-         | Less_Than    Exp Exp
-         | Greater_Than Exp Exp
-         | Equal_To     Exp Exp
-         | Num  Int
-         | Var  String
+         | Mod  Exp Exp
+         | Pow  Exp Exp
+         | Neg  Exp
+         | LessThan         Exp Exp
+         | LessThanEqual    Exp Exp
+         | GreaterThan      Exp Exp
+         | GreaterThanEqual Exp Exp
+         | EqualTo          Exp Exp
+         | NotEqualTo       Exp Exp
+         | And Exp Exp
+         | Or  Exp Exp
+         | Xor Exp Exp
+         | Not Exp
+         | Num Int
+         | Var String
 
 type Prog = Attr    String Exp
           | Seq     Prog Prog
-          | If_Else Exp Prog Prog
+          | IfElse Exp Prog Prog
           | While   Exp Prog
 
 evalExp : Exp -> Env -> Int
 evalExp exp env =
     case exp of
-        -- Mathematical expressions
-        Add  exp1 exp2 ->
+        -- Arithmetic operators
+        Add exp1 exp2 ->
             (evalExp exp1 env) + (evalExp exp2 env)
-        Sub  exp1 exp2 ->
+        Sub exp1 exp2 ->
             (evalExp exp1 env) - (evalExp exp2 env)
         Mult exp1 exp2 ->
             (evalExp exp1 env) * (evalExp exp2 env)
-        Div  exp1 exp2 ->
+        Div exp1 exp2 ->
             (evalExp exp1 env) // (evalExp exp2 env)
+        Mod exp1 exp2 ->
+            (evalExp exp1 env) % (evalExp exp2 env)
+        Pow exp1 exp2 ->
+            (evalExp exp1 env) ^ (evalExp exp2 env)
+        Neg exp1 ->
+            Basics.negate (evalExp exp1 env)
 
-        -- Comparisons
-        Less_Than exp1 exp2 ->
+        -- Relational operators
+        LessThan exp1 exp2 ->
             if (evalExp exp1 env) < (evalExp exp2 env) then 1 else 0
-        Greater_Than exp1 exp2 ->
+        LessThanEqual exp1 exp2 ->
+            if (evalExp exp1 env) <= (evalExp exp2 env) then 1 else 0
+        GreaterThan exp1 exp2 ->
             if (evalExp exp1 env) > (evalExp exp2 env) then 1 else 0
-        Equal_To exp1 exp2 ->
+        GreaterThanEqual exp1 exp2 ->
+            if (evalExp exp1 env) >= (evalExp exp2 env) then 1 else 0
+        EqualTo exp1 exp2 ->
             if (evalExp exp1 env) == (evalExp exp2 env) then 1 else 0
+        NotEqualTo exp1 exp2 ->
+            if (evalExp exp1 env) /= (evalExp exp2 env) then 1 else 0
+
+        -- Logical operators
+        And exp1 exp2 ->
+            if (evalExp exp1 env) /= 0 && (evalExp exp2 env) /= 0 then 1 else 0
+        Or exp1 exp2 ->
+            if (evalExp exp1 env) /= 0 || (evalExp exp2 env) /= 0 then 1 else 0
+        Xor exp1 exp2 ->
+            if Basics.xor ((evalExp exp1 env) /= 0) ((evalExp exp2 env) /= 0) then 1 else 0
+        Not exp1 ->
+            if (evalExp exp1 env) == 0 then 1 else 0
 
         Num  num       -> num
         Var  var       -> (env var)
@@ -52,7 +84,7 @@ evalProg prog env =
             let val = (evalExp exp env)
             in \ask -> if ask == var then val else (env ask)
 
-        If_Else exp s1 s2 ->
+        IfElse exp s1 s2 ->
             if (evalExp exp env) /= 0 then (evalProg s1 env) else (evalProg s2 env)
 
         While exp s1 ->
